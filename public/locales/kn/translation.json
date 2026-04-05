@@ -1,28 +1,83 @@
 {
     "main": {
-        "title": "성경 암송 앱",
-        "pick_lang": "언어 선택",
-        "pick_num_verses": "암송 구절 선택:",
-        "num_verses_tested": "구절 수 선택:",
-        "note_num_verses": "(It will only give you as many verses as there are in selected packs)",
-        "set_review": "Set Review Mode",
-        "note_set_review": "Choose between test mode (default) or review mode",
-        "set_shuffle": "무작위 설정:",
-        "note_set_shuffle": "(Otherwise cards will appear in sequential order)",
-        "hide_reference": "Set Hide Reference:",
-        "note_hide_reference": "Check this box to hide the verse reference and test your memory on the reference as well.",
-        "live_validation": "Enable live validation",
-        "note_live_validation": "Check this box to enable live validation feedback as you type. Uncheck to only show correctness upon completion.",
-        "pick_pack": "Pick your pack(s)",
-        "tools": "Tools:",
-        "verses": "Verses:",
-        "problem_verses_session": "Statistics (This Session):"
+        "title": "성경 암송",
+        "pick_lang": "언어",
+        "pick_num_verses": "학습 설정",
+        "num_verses_tested": "학습할 구절 수",
+        "note_num_verses": "선택한 범위보다 많이 입력하면 가능한 구절까지만 표시됩니다.",
+        "set_review": "리뷰 모드",
+        "note_set_review": "읽기 전용 복습 카드와 직접 입력하는 모드를 전환합니다.",
+        "set_shuffle": "셔플",
+        "note_set_shuffle": "선택한 구절을 무작위 순서로 다시 섞습니다.",
+        "hide_reference": "장절 숨기기",
+        "note_hide_reference": "장절까지 함께 암송하고 싶다면 켜세요.",
+        "live_validation": "실시간 판정",
+        "note_live_validation": "입력 중에도 부분 정답과 정답 피드백을 보여줍니다.",
+        "pick_pack": "주제 선택",
+        "tools": "학습 도구",
+        "verses": "학습 카드",
+        "problem_verses_session": "다시 본 구절",
+        "subtitle": "나비 앱의 카드형 분위기를 유지하되, 노란 포인트는 Hanyang Blue로 바꾼 학습 화면입니다.",
+        "app_badge": "Hanyang Blue Memory",
+        "today_word": "오늘의 말씀",
+        "today_word_description": "현재 학습 흐름에서 먼저 보게 될 구절입니다.",
+        "overview_title": "학습 개요",
+        "overview_description": "현재 세션 설정을 한눈에 확인하세요.",
+        "selected_packs": "선택한 주제",
+        "selected_cards": "선택된 카드",
+        "study_mode": "모드",
+        "shuffle_state": "셔플",
+        "review_mode_value": "리뷰",
+        "test_mode_value": "암송",
+        "on": "켜짐",
+        "off": "꺼짐",
+        "tools_description": "빠른 실행 버튼으로 학습 흐름을 이어가세요.",
+        "selection_description": "암송할 주제와 범위를 선택하세요.",
+        "study_description": "파란 테마 카드에서 암송하고 정답을 확인하세요.",
+        "stats_description": "이번 세션에서 정답 보기를 열어본 구절입니다.",
+        "clear_all": "전체 초기화",
+        "shuffle_now": "다시 섞기",
+        "nav_home": "홈",
+        "nav_settings": "설정",
+        "nav_cards": "카드",
+        "nav_stats": "통계",
+        "no_verse_selected": "주제를 선택하면 미리보기와 학습 카드가 표시됩니다.",
+        "bug_report": "버그 제보",
+        "built_on": "빌드 날짜",
+        "lang_english": "English",
+        "lang_korean": "한국어",
+        "answer_revealed_count": "정답 보기 {{count}}회",
+        "mobile_focus_note": "휴대폰에서 엄지손가락으로 빠르게 쓰도록 흐름을 다시 구성했습니다.",
+        "study_preferences": "현재 학습 설정",
+        "mobile_preferences_description": "암송과 리뷰 화면은 이 설정을 기준으로 동작합니다.",
+        "recite_now": "바로 암송",
+        "recite_now_note": "선택한 구절로 즉시 입력 모드에 들어갑니다.",
+        "review_now": "리뷰 카드",
+        "review_now_note": "읽기 전용 카드로 반복 복습합니다.",
+        "open_topics": "주제 선택",
+        "no_flags_yet": "이번 세션에서 아직 정답 보기를 열지 않았습니다.",
+        "study_setup_note": "언어와 학습 분량을 휴대폰 화면에 맞게 빠르게 조정하세요.",
+        "mobile_toggle_note": "카드를 열기 전에 필요한 옵션만 간단히 켜고 끄세요.",
+        "nav_topics": "주제"
     },
     "verse_validator": {
-        "input_reference": "Input Verse Reference: ",
-        "input_chapter_title": "Input Chapter Title: ",
-        "input_title": "Input Title: ",
-        "input_verse": "Input Verse: "
+        "input_reference": "장절 입력",
+        "input_chapter_title": "대제목 입력",
+        "input_title": "제목 입력",
+        "input_verse": "본문 입력",
+        "show_hints": "힌트 보기",
+        "hide_hints": "힌트 숨기기",
+        "next_word": "다음 단어",
+        "show_answer": "정답 보기",
+        "hide_answer": "정답 닫기",
+        "reset": "초기화",
+        "differences": "정답 비교",
+        "pack": "주제",
+        "reference": "장절",
+        "chapter_title": "대제목",
+        "title": "제목",
+        "verse": "본문",
+        "verse_number": "구절 {{index}}"
     },
     "nodes": [
         {
@@ -37,11 +92,26 @@
             "value": "tms60",
             "label": "60구절",
             "children": [
-                { "value": "tms-60-pack-a", "label": "새로운 삶" },
-                { "value": "tms-60-pack-b", "label": "그리스도를 전파함" },
-                { "value": "tms-60-pack-c", "label": "하나님을 의뢰함" },
-                { "value": "tms-60-pack-d", "label": "그리스도 제자의 자격" },
-                { "value": "tms-60-pack-e", "label": "그리스도를 닮아감" }
+                {
+                    "value": "tms-60-pack-a",
+                    "label": "새로운 삶"
+                },
+                {
+                    "value": "tms-60-pack-b",
+                    "label": "그리스도를 전파함"
+                },
+                {
+                    "value": "tms-60-pack-c",
+                    "label": "하나님을 의뢰함"
+                },
+                {
+                    "value": "tms-60-pack-d",
+                    "label": "그리스도 제자의 자격"
+                },
+                {
+                    "value": "tms-60-pack-e",
+                    "label": "그리스도를 닮아감"
+                }
             ]
         },
         {
@@ -52,62 +122,140 @@
             "value": "dep-2",
             "label": "DEP 2",
             "children": [
-                { "value": "dep-2-part-a", "label": "왜 QT를 가져야 하는가?" },
-                { "value": "dep-2-part-b", "label": "QT란 무엇인가?" },
-                { "value": "dep-2-part-c", "label": "QT의 본" }
+                {
+                    "value": "dep-2-part-a",
+                    "label": "왜 QT를 가져야 하는가?"
+                },
+                {
+                    "value": "dep-2-part-b",
+                    "label": "QT란 무엇인가?"
+                },
+                {
+                    "value": "dep-2-part-c",
+                    "label": "QT의 본"
+                }
             ]
         },
         {
             "value": "dep-3",
             "label": "DEP 3",
             "children": [
-                { "value": "dep-3-part-a", "label": "말씀의 권위" },
-                { "value": "dep-3-part-b", "label": "말씀의 가치" },
-                { "value": "dep-3-part-c", "label": "말씀에 대한 태도" },
-                { "value": "dep-3-part-d", "label": "말씀의 섭취 방법 말씀의 손 예화" }
+                {
+                    "value": "dep-3-part-a",
+                    "label": "말씀의 권위"
+                },
+                {
+                    "value": "dep-3-part-b",
+                    "label": "말씀의 가치"
+                },
+                {
+                    "value": "dep-3-part-c",
+                    "label": "말씀에 대한 태도"
+                },
+                {
+                    "value": "dep-3-part-d",
+                    "label": "말씀의 섭취 방법 말씀의 손 예화"
+                }
             ]
         },
         {
             "value": "dep-4",
             "label": "DEP 4",
             "children": [
-                { "value": "dep-4-part-a", "label": "기도의 명령" },
-                { "value": "dep-4-part-b", "label": "기도의 약속과 축복" },
-                { "value": "dep-4-part-c", "label": "응답받는 기도의 조건" },
-                { "value": "dep-4-part-d", "label": "기도의 본" },
-                { "value": "dep-4-part-e", "label": "기도의 손 예화" }
+                {
+                    "value": "dep-4-part-a",
+                    "label": "기도의 명령"
+                },
+                {
+                    "value": "dep-4-part-b",
+                    "label": "기도의 약속과 축복"
+                },
+                {
+                    "value": "dep-4-part-c",
+                    "label": "응답받는 기도의 조건"
+                },
+                {
+                    "value": "dep-4-part-d",
+                    "label": "기도의 본"
+                },
+                {
+                    "value": "dep-4-part-e",
+                    "label": "기도의 손 예화"
+                }
             ]
         },
         {
             "value": "dep-5",
             "label": "DEP 5",
             "children": [
-                { "value": "dep-5-part-a", "label": "교제의 기초" },
-                { "value": "dep-5-part-b", "label": "교제의 중요성" },
-                { "value": "dep-5-part-c", "label": "교제의 요소" },
-                { "value": "dep-5-part-d", "label": "교제의 태도" },
-                { "value": "dep-5-part-e", "label": "교제에서의 문제 해결" }
+                {
+                    "value": "dep-5-part-a",
+                    "label": "교제의 기초"
+                },
+                {
+                    "value": "dep-5-part-b",
+                    "label": "교제의 중요성"
+                },
+                {
+                    "value": "dep-5-part-c",
+                    "label": "교제의 요소"
+                },
+                {
+                    "value": "dep-5-part-d",
+                    "label": "교제의 태도"
+                },
+                {
+                    "value": "dep-5-part-e",
+                    "label": "교제에서의 문제 해결"
+                }
             ]
         },
         {
-            "value":"dep-6",
-            "label":"DEP 6",
+            "value": "dep-6",
+            "label": "DEP 6",
             "children": [
-                { "value": "dep-6-part-a", "label": "전도는 누구의 책임인가?" },
-                { "value": "dep-6-part-b", "label": "왜 전도를 해야 하나?" },
-                { "value": "dep-6-part-c", "label": "어떻게 전도하나?" },
-                { "value": "dep-6-part-d", "label": "전도의 모범" },
-                { "value": "dep-6-part-e", "label": "다리 예화" }
+                {
+                    "value": "dep-6-part-a",
+                    "label": "전도는 누구의 책임인가?"
+                },
+                {
+                    "value": "dep-6-part-b",
+                    "label": "왜 전도를 해야 하나?"
+                },
+                {
+                    "value": "dep-6-part-c",
+                    "label": "어떻게 전도하나?"
+                },
+                {
+                    "value": "dep-6-part-d",
+                    "label": "전도의 모범"
+                },
+                {
+                    "value": "dep-6-part-e",
+                    "label": "다리 예화"
+                }
             ]
         },
         {
-            "value":"dep-7",
-            "label":"DEP 7",
+            "value": "dep-7",
+            "label": "DEP 7",
             "children": [
-                { "value": "dep-7-part-a", "label": "주재권을 인정해야 함" },
-                { "value": "dep-7-part-b", "label": "주재권을 인정할 때의 축복" },
-                { "value": "dep-7-part-c", "label": "주재권을 인정할 영역" },
-                { "value": "dep-7-part-d", "label": "주재권을 인정한 삶의 모범" }
+                {
+                    "value": "dep-7-part-a",
+                    "label": "주재권을 인정해야 함"
+                },
+                {
+                    "value": "dep-7-part-b",
+                    "label": "주재권을 인정할 때의 축복"
+                },
+                {
+                    "value": "dep-7-part-c",
+                    "label": "주재권을 인정할 영역"
+                },
+                {
+                    "value": "dep-7-part-d",
+                    "label": "주재권을 인정한 삶의 모범"
+                }
             ]
         },
         {

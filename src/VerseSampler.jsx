@@ -1,366 +1,559 @@
-/* 
-Implemented features:
-- read keys from json
-- create checklist from keys
-*/
-import fullVerseData from "./assets/verse.json" // the actual verse json data file
-import { useState, useEffect, useMemo, useCallback } from "react";
-import CheckboxTree from 'react-checkbox-tree';
-import 'react-checkbox-tree/lib/react-checkbox-tree.css';
-import _ from 'underscore';
-import './VerseSampler.css'
-import VerseValidator from "./VerseValidator";
+/* eslint-disable react/prop-types */
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import CheckboxTree from "react-checkbox-tree";
+import _ from "underscore";
+import { useTranslation } from "react-i18next";
+import "react-checkbox-tree/lib/react-checkbox-tree.css";
+import fullVerseData from "./assets/verse.json";
+import logo from "./assets/droplet.svg";
+import naviLogo from "./assets/navi-logo-hy-blue.png";
 import VersePrinter from "./VersePrinter";
-import { useTranslation } from 'react-i18next';
-import logo from './assets/droplet.svg';
-import { Suspense } from "react";
+import VerseValidator from "./VerseValidator";
+import "./VerseSampler.css";
 
-
-const ArrayTester = ({ array, toHideReference, liveValidation, clearKey, translate, onShowAnswer}) => {
-  const list = array.map((element, index) => (
-    // key needs to be unique; chose 3 elements that will separate all elements
-    <VerseValidator 
-      key={element.pack + element.title + element.reference}
-      element={element} 
-      toHideReference={toHideReference} 
-      liveValidation={liveValidation}
-      clearKey={clearKey} // Pass clearKey down
-      t={translate} // this passes the t i18 object to the function
-      index={index + 1}
-      onShowAnswer={onShowAnswer}
-    />
-  ))
-  return list
-}
-
-
-const ArrayPrinter = ({ array, translate}) => {
-  const list = array.map((element, index) => (
-    // key needs to be unique; chose 3 elements that will separate all elements
-    <VersePrinter 
-      key={element.pack + element.title + element.reference}
-      element={element} 
-      t={translate} // this passes the t i18 object to the function
-      index={index + 1}
-    />
-  ))
-  return list
-}
-
-
-const CheckboxWidget = ({nodes, checked, expanded, setChecked, setExpanded}) => {
-  return (
-    <div className="CheckboxTree">
-      <CheckboxTree
-        nodes={nodes}
-        checked={checked}
-        expanded={expanded}
-        onCheck={setChecked}
-        onExpand={setExpanded}
+const ArrayTester = ({ array, toHideReference, liveValidation, clearKey, translate, onShowAnswer }) => (
+  <div className="study-card-list">
+    {array.map((element, index) => (
+      <VerseValidator
+        key={`${element.pack}${element.title}${element.reference}`}
+        element={element}
+        toHideReference={toHideReference}
+        liveValidation={liveValidation}
+        clearKey={clearKey}
+        t={translate}
+        index={index + 1}
+        onShowAnswer={onShowAnswer}
       />
-    </div>
-  );
-}
+    ))}
+  </div>
+);
 
-// loadCustomData
+const ArrayPrinter = ({ array, translate }) => (
+  <div className="study-card-list">
+    {array.map((element, index) => (
+      <VersePrinter
+        key={`${element.pack}${element.title}${element.reference}`}
+        element={element}
+        t={translate}
+        index={index + 1}
+      />
+    ))}
+  </div>
+);
+
+const CheckboxWidget = ({ nodes, checked, expanded, setChecked, setExpanded }) => (
+  <div className="CheckboxTree">
+    <CheckboxTree
+      nodes={nodes}
+      checked={checked}
+      expanded={expanded}
+      onCheck={setChecked}
+      onExpand={setExpanded}
+    />
+  </div>
+);
+
+const PanelCard = ({ title, description, children }) => (
+  <section className="panel-card">
+    <div className="panel-heading">
+      <div>
+        <h2>{title}</h2>
+        {description ? <p>{description}</p> : null}
+      </div>
+    </div>
+    {children}
+  </section>
+);
+
+const ToggleSetting = ({ title, description, checked, onChange, disabled }) => (
+  <label className={`setting-card ${disabled ? "is-disabled" : ""}`}>
+    <div className="setting-copy">
+      <strong>{title}</strong>
+      <span>{description}</span>
+    </div>
+    <span className={`toggle-switch ${checked ? "is-on" : ""}`} aria-hidden="true">
+      <input type="checkbox" checked={checked} onChange={onChange} disabled={disabled} />
+      <span className="toggle-thumb" />
+    </span>
+  </label>
+);
+
+const SummaryStat = ({ label, value }) => (
+  <div className="summary-stat">
+    <span>{label}</span>
+    <strong>{value}</strong>
+  </div>
+);
+
+const QuickActionCard = ({ title, subtitle, onClick, tone = "primary", icon, disabled = false }) => (
+  <button
+    type="button"
+    className={`quick-action-card quick-action-card--${tone}`}
+    onClick={onClick}
+    disabled={disabled}
+  >
+    <span className="quick-action-icon" aria-hidden="true">{icon}</span>
+    <span className="quick-action-copy">
+      <strong>{title}</strong>
+      <small>{subtitle}</small>
+    </span>
+  </button>
+);
+
 const loadCustomData = (language) => {
-  let data;
-  // console.log(language)
   switch (language) {
-    case 'kn':
-      data = fullVerseData.kn;
-      break;
-    case 'en':
+    case "kn":
+      return fullVerseData.kn;
+    case "en":
     default:
-      data = fullVerseData.en;
-      break;// 
+      return fullVerseData.en;
   }
-  return data;
 };
 
+const buildNodeLabelMap = (nodes) => {
+  const map = {};
 
-
-
-function Page() {
-
-  // refresh button for refresh
-  const RefreshButton = ({ onClick, disabled }) => {
-    return <button onClick={onClick} disabled={disabled}>Shuffle</button>;
-  };
-  // refresh variables where incrementing state forces refresh
-  const [shuffleKey, setShuffleKey] = useState(0);
-  const handleShuffle = () => {
-    // Increment the key to force a re-render
-    setShuffleKey(shuffleKey => shuffleKey + 1);
-  };
-
-  // New state for clearing all inputs
-  const [clearKey, setClearKey] = useState(0);
-  const handleClearAll = () => {
-    setClearKey(clearKey => clearKey + 1);
-  };
-
-  // New state for tracking problem verses within the session
-  const [sessionProblemVerses, setSessionProblemVerses] = useState({});
-
-  // Callback for when 'Show Answer' is clicked in VerseValidator
-  const handleShowAnswer = useCallback((verseIdentifier) => {
-    const key = `${verseIdentifier.pack}|${verseIdentifier.reference}`;
-    setSessionProblemVerses(prev => ({
-        ...prev,
-        [key]: (prev[key] || 0) + 1
-    }));
-  }, []);
-
-  // setup i18 for function
-  const { t, i18n } = useTranslation();
-
-  // we should not load the file every time
-  const [VerseData, setVerseData] = useState(null);
-  // effect to only run on first render
-  // empty dependency means only mount once
-  useEffect(() => {
-    setVerseData(loadCustomData(i18n.language));
-  }, []);
-
-  
-  // function hook to change language
-  // updates both i18n language and also the VerseData state variable
-  const changeLanguage = (lng) => {
-    // reset selection list
-    setChecked([]);
-    setExpanded([]);
-
-    // i18n.changeLanguage is async, so we should wait until its done to avoid
-    // race conditions
-    // console.log("change language");
-    i18n.changeLanguage(lng).then(() => {
-      setVerseData(loadCustomData(i18n.language));
+  const walk = (items = []) => {
+    items.forEach((item) => {
+      map[item.value] = item.label;
+      if (item.children) {
+        walk(item.children);
+      }
     });
   };
 
+  walk(nodes);
+  return map;
+};
 
-  // initialize state variable testCount
-  // purpose: to set number of verses to test
-  const [testCount, setTestCount] = useState(30)
-  const testCountChange = (e) => {
-    const value = e.target.value
-    setTestCount(value)
-  }
+function Page() {
+  const { t, i18n } = useTranslation();
+  const buildDate = import.meta.env.VITE_BUILD_DATE ?? new Date().toISOString().slice(0, 10);
 
-
-  // variables for pack selection
-  const [checked, setChecked] = useState([])
-  const [expanded, setExpanded] = useState([])
-  
-
-  // state for toShuffle
+  const [shuffleKey, setShuffleKey] = useState(0);
+  const [clearKey, setClearKey] = useState(0);
+  const [sessionProblemVerses, setSessionProblemVerses] = useState({});
+  const [verseData, setVerseData] = useState(null);
+  const [testCount, setTestCount] = useState("30");
+  const [checked, setChecked] = useState([]);
+  const [expanded, setExpanded] = useState([]);
   const [toShuffle, setShuffle] = useState(false);
-  // Function to handle checkbox change
-  const handleShuffleCheckboxChange = () => {
-    // additional state change to disable HideReference when shuffling
+  const [toReview, setReview] = useState(false);
+  const [toHideReference, setHideReference] = useState(false);
+  const [liveValidation, setLiveValidation] = useState(true);
+  const [activeTab, setActiveTab] = useState("home");
+
+  useEffect(() => {
+    setVerseData(loadCustomData(i18n.language));
+  }, [i18n.language]);
+
+  const translatedNodes = t("nodes", { returnObjects: true });
+  const nodeLabelMap = useMemo(() => buildNodeLabelMap(translatedNodes), [translatedNodes]);
+
+  const handleShuffle = useCallback(() => {
+    setShuffleKey((current) => current + 1);
+  }, []);
+
+  const handleClearAll = useCallback(() => {
+    setClearKey((current) => current + 1);
+  }, []);
+
+  const handleShowAnswer = useCallback((verseIdentifier) => {
+    const key = `${verseIdentifier.pack}|${verseIdentifier.reference}`;
+    setSessionProblemVerses((previous) => ({
+      ...previous,
+      [key]: (previous[key] || 0) + 1,
+    }));
+  }, []);
+
+  const changeLanguage = useCallback((language) => {
+    setChecked([]);
+    setExpanded([]);
+    i18n.changeLanguage(language);
+  }, [i18n]);
+
+  const handleShuffleCheckboxChange = useCallback(() => {
     if (!toShuffle) {
       setHideReference(false);
     }
-    // Toggle the state when the checkbox is changed
-    // modify state at the end
-    setShuffle(!toShuffle);
-  };
+    setShuffle((current) => !current);
+  }, [toShuffle]);
 
-  // state for toReview
-  const [toReview, setReview] = useState(false);
-  // Function to handle checkbox change
-  const handleReviewCheckboxChange = () => {
-  // additional state change to disable HideReference when reviewing
+  const handleReviewCheckboxChange = useCallback(() => {
     if (!toReview) {
       setHideReference(false);
     }
-    // Toggle the state when the checkbox is changed
-    // modify state at the end
-    setReview(!toReview);
-  };
+    setReview((current) => !current);
+  }, [toReview]);
 
+  const handleHideReferenceCheckboxChange = useCallback(() => {
+    setHideReference((current) => !current);
+  }, []);
 
-  // state for toHideReference
-  const [toHideReference, setHideReference] = useState(false);
-  // Function to handle checkbox change
-  const handleHideReferenceCheckboxChange = () => {
-    if (!toHideReference) {
-      setHideReference(false);
-    }
-    // Toggle the state when the checkbox is changed
-    setHideReference(!toHideReference);
-  };
+  const handleLiveValidationCheckboxChange = useCallback(() => {
+    setLiveValidation((current) => !current);
+  }, []);
 
-  // state for liveValidation
-  const [liveValidation, setLiveValidation] = useState(true);
-  // Function to handle checkbox change
-  const handleLiveValidationCheckboxChange = () => {
-    // Toggle the state when the checkbox is changed
-    setLiveValidation(!liveValidation);
-  };
+  const requestedVerseCount = useMemo(() => {
+    const parsed = Number.parseInt(testCount, 10);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+  }, [testCount]);
 
-  // generate testList using cached state that depends only on shuffle-dependent variables
-  // this fixes the bug where changing other state causes a re-shuffle
-  const testList = useMemo(() => {
-    if (!VerseData || checked.length === 0) {
+  const selectedVerses = useMemo(() => {
+    if (!verseData || checked.length === 0) {
       return [];
     }
-    let list = checked.reduce(
-      (accumulator, currentValue) => accumulator.concat(VerseData[currentValue]),
-      []
-    );
-    return toShuffle ? _.sample(list, testCount) : _.first(list, testCount);
-  }, [VerseData, checked, testCount, toShuffle, shuffleKey]);
 
-  // Reset session problem verses when the testList changes (new session)
+    return checked.reduce((accumulator, currentValue) => {
+      const entries = verseData[currentValue] ?? [];
+      return accumulator.concat(entries);
+    }, []);
+  }, [verseData, checked]);
+
+  const testList = useMemo(() => {
+    void shuffleKey;
+
+    if (selectedVerses.length === 0 || requestedVerseCount === 0) {
+      return [];
+    }
+
+    return toShuffle
+      ? _.sample(selectedVerses, requestedVerseCount)
+      : _.first(selectedVerses, requestedVerseCount);
+  }, [selectedVerses, requestedVerseCount, toShuffle, shuffleKey]);
+
   useEffect(() => {
     setSessionProblemVerses({});
   }, [testList]);
 
+  const selectedPackLabels = checked.map((value) => nodeLabelMap[value] ?? value);
+  const totalRevealCount = Object.values(sessionProblemVerses).reduce((sum, count) => sum + count, 0);
+  const flaggedVerses = useMemo(
+    () => Object.entries(sessionProblemVerses).sort(([, countA], [, countB]) => countB - countA),
+    [sessionProblemVerses],
+  );
 
-  
+  const openCardsTab = useCallback((reviewMode) => {
+    setReview(reviewMode);
+    setActiveTab(selectedVerses.length > 0 ? "cards" : "packs");
+  }, [selectedVerses.length]);
+
+  const tabItems = [
+    { id: "home", label: t("main.nav_home"), icon: "◉" },
+    { id: "study", label: t("main.nav_settings"), icon: "◌" },
+    { id: "packs", label: t("main.nav_topics"), icon: "▤" },
+    { id: "cards", label: t("main.nav_cards"), icon: "▣" },
+  ];
+
+  const overviewItems = [
+    { label: t("main.selected_packs"), value: checked.length },
+    { label: t("main.selected_cards"), value: selectedVerses.length },
+    { label: t("main.study_mode"), value: toReview ? t("main.review_mode_value") : t("main.test_mode_value") },
+    { label: t("main.problem_verses_session"), value: totalRevealCount },
+  ];
+
   return (
-    <div className="App">
-      <h1>{t('main.title')}</h1>
-      <h2>{t('main.pick_lang')}</h2>
-
-      <div className="lang-bar">
-        <button type="button" onClick={() => changeLanguage('en')}>English</button>
-        <button type="button" onClick={() => changeLanguage('kn')}>Korean</button>
-      </div>
-
-      <h2>{t('main.pick_num_verses')}</h2>
-      <label className="test-count-box-label" htmlFor="testCountBox">
-        {t('main.num_verses_tested')}
-      </label>
-      <input
-        className="test-count-box"
-        type="text"
-        id="testCountBox"
-        name="testCountBox"
-        placeholder={testCount}
-        onChange={testCountChange}
-      />
-
-      <p>{t('main.note_num_verses')}</p>
-
-      <h2>
-        {t('main.set_review')} 
-        <input
-          type="checkbox"
-          checked={toReview}
-          onChange={handleReviewCheckboxChange}
-        />
-      </h2>
-      <p>{t('main.note_set_review')}</p>
-
-
-      <h2>
-        {t('main.set_shuffle')} 
-        <input
-          type="checkbox"
-          checked={toShuffle}
-          onChange={handleShuffleCheckboxChange}
-        />
-      </h2>
-      <p>{t('main.note_set_shuffle')}</p>
-
-      <div className={(toShuffle || toReview) ? 'setting-disabled' : ''}>
-        <h2>
-          {t('main.hide_reference')}
-          <input
-            type="checkbox"
-            checked={toHideReference}
-            onChange={handleHideReferenceCheckboxChange}
-            disabled={toShuffle || toReview}
-          />
-        </h2>
-        <p>{t('main.note_hide_reference')}</p>
-      </div>
-
-      <div className={toReview ? 'setting-disabled' : ''}>
-        <h2>
-          {t('main.live_validation')}
-          <input
-            type="checkbox"
-            checked={liveValidation}
-            onChange={handleLiveValidationCheckboxChange}
-            disabled={toReview}
-          />
-        </h2>
-        <p>{t('main.note_live_validation')}</p>
-      </div>
-
-
-      <h2>{t('main.pick_pack')}</h2>
-      <CheckboxWidget
-        nodes={t('nodes', { returnObjects: true })}
-        checked={checked}
-        expanded={expanded}
-        setChecked={setChecked}
-        setExpanded={setExpanded}
-      />
-
-      <h2>{t('main.tools')}</h2>
-      <div className="tool-bar">
-        <RefreshButton onClick={handleShuffle} disabled={!toShuffle} />
-        <button onClick={handleClearAll}>Clear All</button>
-      </div>
-
-      <h1>{t('main.verses')}</h1>
-      {toReview ?
-        <ArrayPrinter
-          array={testList}
-          translate={t}
-        /> :
-        <ArrayTester
-          array={testList}
-          toHideReference={toHideReference}
-          liveValidation={liveValidation}
-          clearKey={clearKey} // Pass clearKey down
-          translate={t}
-          onShowAnswer={handleShowAnswer}
-        />
-      }
-
-      {Object.keys(sessionProblemVerses).length > 0 && (
-        <div className="session-problem-verses">
-            <h2>{t('main.problem_verses_session')}</h2>
-            <ul>
-                {Object.entries(sessionProblemVerses)
-                    .sort(([, countA], [, countB]) => countB - countA) // Sort by count in descending order
-                    .map(([key, count]) => {
-                    // Assuming key format is "pack:reference"
-                    const [pack, reference] = key.split('|');
-                    return <li key={key}>{reference} (Shown Answer: {count} time{count > 1 ? 's' : ''})</li>;
-                })}
-            </ul>
+    <div className="AppShell">
+      <header className="app-hero">
+        <div className="hero-card hero-logo-card">
+          <img src={naviLogo} alt={t("main.app_badge")} className="hero-logo-image" />
         </div>
-      )}
+      </header>
 
-    <hr />
+      <main className="app-content app-content-mobile">
+        {activeTab === "home" ? (
+          <div className="mobile-screen">
+            <PanelCard title={t("main.overview_title")} description={t("main.mobile_focus_note")}>
+              <div className="home-title-block">
+                <h1>{t("main.title")}</h1>
+                <p>{t("main.subtitle")}</p>
+              </div>
 
-    <p><x-small> Built on: {VITE_BUILD_DATE} </x-small></p>
-    <p>
-      <x-small>
-        <a href="https://github.com/RichFree/VerseChecker/issues">File a bug report</a>
-      </x-small>
-    </p>
+              <div className="summary-grid">
+                {overviewItems.map((item) => (
+                  <SummaryStat key={item.label} label={item.label} value={item.value} />
+                ))}
+              </div>
+
+              {selectedPackLabels.length > 0 ? (
+                <div className="topic-pill-row">
+                  {selectedPackLabels.map((label) => (
+                    <span className="topic-pill" key={label}>{label}</span>
+                  ))}
+                </div>
+              ) : null}
+            </PanelCard>
+
+            <PanelCard title={t("main.tools")} description={t("main.tools_description")}>
+              <div className="quick-action-grid">
+                <QuickActionCard
+                  title={t("main.recite_now")}
+                  subtitle={t("main.recite_now_note")}
+                  onClick={() => openCardsTab(false)}
+                  tone="primary"
+                  icon="✎"
+                />
+                <QuickActionCard
+                  title={t("main.review_now")}
+                  subtitle={t("main.review_now_note")}
+                  onClick={() => openCardsTab(true)}
+                  tone="secondary"
+                  icon="☑"
+                />
+                <QuickActionCard
+                  title={t("main.open_topics")}
+                  subtitle={t("main.selection_description")}
+                  onClick={() => setActiveTab("packs")}
+                  tone="ghost"
+                  icon="☰"
+                />
+              </div>
+
+              <div className="action-row action-row--single">
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={() => {
+                    handleShuffle();
+                    setActiveTab(selectedVerses.length > 0 ? "cards" : "packs");
+                  }}
+                >
+                  {t("main.shuffle_now")}
+                </button>
+              </div>
+            </PanelCard>
+
+            <PanelCard title={t("main.study_preferences")} description={t("main.mobile_preferences_description")}>
+              <div className="preference-list">
+                <div className="preference-row">
+                  <span>{t("main.num_verses_tested")}</span>
+                  <strong>{requestedVerseCount || 0}</strong>
+                </div>
+                <div className="preference-row">
+                  <span>{t("main.set_shuffle")}</span>
+                  <strong>{toShuffle ? t("main.on") : t("main.off")}</strong>
+                </div>
+                <div className="preference-row">
+                  <span>{t("main.set_review")}</span>
+                  <strong>{toReview ? t("main.on") : t("main.off")}</strong>
+                </div>
+                <div className="preference-row">
+                  <span>{t("main.hide_reference")}</span>
+                  <strong>{toHideReference ? t("main.on") : t("main.off")}</strong>
+                </div>
+                <div className="preference-row">
+                  <span>{t("main.live_validation")}</span>
+                  <strong>{liveValidation ? t("main.on") : t("main.off")}</strong>
+                </div>
+              </div>
+            </PanelCard>
+
+            <PanelCard title={t("main.problem_verses_session")} description={t("main.stats_description")}>
+              {flaggedVerses.length > 0 ? (
+                <div className="session-problem-verses">
+                  <ul>
+                    {flaggedVerses.map(([key, count]) => {
+                      const [pack, reference] = key.split("|");
+                      return (
+                        <li key={key}>
+                          <span>
+                            <strong>{reference}</strong>
+                            <em>{pack}</em>
+                          </span>
+                          <b>{t("main.answer_revealed_count", { count })}</b>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              ) : (
+                <div className="empty-state-card">{t("main.no_flags_yet")}</div>
+              )}
+            </PanelCard>
+          </div>
+        ) : null}
+
+        {activeTab === "study" ? (
+          <div className="mobile-screen">
+            <PanelCard title={t("main.pick_lang")} description={t("main.study_setup_note")}>
+              <div className="segmented-control" aria-label={t("main.pick_lang")}>
+                <button
+                  type="button"
+                  className={`segmented-button ${i18n.language === "en" ? "is-active" : ""}`}
+                  onClick={() => changeLanguage("en")}
+                >
+                  {t("main.lang_english")}
+                </button>
+                <button
+                  type="button"
+                  className={`segmented-button ${i18n.language === "kn" ? "is-active" : ""}`}
+                  onClick={() => changeLanguage("kn")}
+                >
+                  {t("main.lang_korean")}
+                </button>
+              </div>
+
+              <div className="count-card">
+                <label className="count-card-label" htmlFor="testCountBox">
+                  {t("main.num_verses_tested")}
+                </label>
+                <input
+                  className="test-count-input"
+                  type="number"
+                  min="1"
+                  id="testCountBox"
+                  name="testCountBox"
+                  value={testCount}
+                  onChange={(event) => setTestCount(event.target.value)}
+                />
+                <p className="helper-text">{t("main.note_num_verses")}</p>
+              </div>
+            </PanelCard>
+
+            <PanelCard title={t("main.pick_num_verses")} description={t("main.mobile_toggle_note")}>
+              <div className="setting-grid">
+                <ToggleSetting
+                  title={t("main.set_review")}
+                  description={t("main.note_set_review")}
+                  checked={toReview}
+                  onChange={handleReviewCheckboxChange}
+                />
+                <ToggleSetting
+                  title={t("main.set_shuffle")}
+                  description={t("main.note_set_shuffle")}
+                  checked={toShuffle}
+                  onChange={handleShuffleCheckboxChange}
+                />
+                <ToggleSetting
+                  title={t("main.hide_reference")}
+                  description={t("main.note_hide_reference")}
+                  checked={toHideReference}
+                  onChange={handleHideReferenceCheckboxChange}
+                  disabled={toShuffle || toReview}
+                />
+                <ToggleSetting
+                  title={t("main.live_validation")}
+                  description={t("main.note_live_validation")}
+                  checked={liveValidation}
+                  onChange={handleLiveValidationCheckboxChange}
+                  disabled={toReview}
+                />
+              </div>
+            </PanelCard>
+          </div>
+        ) : null}
+
+        {activeTab === "packs" ? (
+          <div className="mobile-screen">
+            <PanelCard title={t("main.pick_pack")} description={t("main.selection_description")}>
+              <CheckboxWidget
+                nodes={translatedNodes}
+                checked={checked}
+                expanded={expanded}
+                setChecked={setChecked}
+                setExpanded={setExpanded}
+              />
+            </PanelCard>
+          </div>
+        ) : null}
+
+        {activeTab === "cards" ? (
+          <div className="mobile-screen">
+            <PanelCard title={t("main.verses")} description={t("main.study_description")}>
+              <div className="segmented-control segmented-control--study" aria-label={t("main.study_mode")}>
+                <button
+                  type="button"
+                  className={`segmented-button ${!toReview ? "is-active" : ""}`}
+                  onClick={() => setReview(false)}
+                >
+                  {t("main.test_mode_value")}
+                </button>
+                <button
+                  type="button"
+                  className={`segmented-button ${toReview ? "is-active" : ""}`}
+                  onClick={() => setReview(true)}
+                >
+                  {t("main.review_mode_value")}
+                </button>
+              </div>
+
+              <div className="action-row">
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={handleShuffle}
+                  disabled={selectedVerses.length === 0}
+                >
+                  {t("main.shuffle_now")}
+                </button>
+                <button type="button" className="ghost-button" onClick={handleClearAll}>
+                  {t("main.clear_all")}
+                </button>
+              </div>
+
+              {testList.length > 0 ? (
+                toReview ? (
+                  <ArrayPrinter array={testList} translate={t} />
+                ) : (
+                  <ArrayTester
+                    array={testList}
+                    toHideReference={toHideReference}
+                    liveValidation={liveValidation}
+                    clearKey={clearKey}
+                    translate={t}
+                    onShowAnswer={handleShowAnswer}
+                  />
+                )
+              ) : (
+                <div className="empty-state-card empty-state-card--actionable">
+                  <p>{t("main.no_verse_selected")}</p>
+                  <button type="button" className="primary-button" onClick={() => setActiveTab("packs")}>
+                    {t("main.open_topics")}
+                  </button>
+                </div>
+              )}
+            </PanelCard>
+          </div>
+        ) : null}
+      </main>
+
+      <footer className="footer-meta">
+        <p>
+          <small>
+            {t("main.built_on")}: {buildDate}
+          </small>
+        </p>
+        <p>
+          <small>
+            <a href="https://github.com/RichFree/VerseChecker/issues">{t("main.bug_report")}</a>
+          </small>
+        </p>
+      </footer>
+
+      <nav className="bottom-nav" aria-label="Bottom navigation">
+        {tabItems.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            className={`nav-button ${activeTab === item.id ? "is-active" : ""}`}
+            onClick={() => setActiveTab(item.id)}
+            aria-current={activeTab === item.id ? "page" : undefined}
+          >
+            <span className="nav-icon">{item.icon}</span>
+            <span>{item.label}</span>
+          </button>
+        ))}
+      </nav>
     </div>
   );
-}  
+}
 
-// loading component for suspense fallback
 const Loader = () => (
-  <div className="App">
-    <img 
-      src={logo} 
-      className="App-logo" 
-      alt="logo" 
-      style={{ width: '20vw', height: 'auto' }} 
-    />
-    <div>loading...</div>
+  <div className="AppShell loader-shell">
+    <div className="loader-card">
+      <img src={logo} className="brand-logo loader-logo" alt="logo" />
+      <div>loading...</div>
+    </div>
   </div>
 );
 

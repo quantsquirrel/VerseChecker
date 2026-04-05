@@ -1,28 +1,83 @@
 {
     "main": {
-        "title": "Scripture Memory Tester",
-        "pick_lang": "Pick Language",
-        "pick_num_verses": "Pick Number of Verses:",
-        "num_verses_tested": "Number of Verses Tested:",
-        "note_num_verses": "(It will only give you as many verses as there are in selected packs)",
-        "set_review": "Set Review Mode",
-        "note_set_review": "Choose between test mode (default) or review mode",
-        "set_shuffle": "Set Shuffle:",
-        "note_set_shuffle": "(Otherwise cards will appear in sequential order)",
-        "hide_reference": "Set Hide Reference:",
-        "note_hide_reference": "Check this box to hide the verse reference and test your memory on the reference as well.",
-        "live_validation": "Enable live validation",
-        "note_live_validation": "Check this box to enable live validation feedback as you type. Uncheck to only show correctness upon completion.",
-        "pick_pack": "Pick your pack(s)",
-        "tools": "Tools:",
-        "verses": "Verses:",
-        "problem_verses_session": "Statistics (This Session):"
+        "title": "Scripture Memory",
+        "pick_lang": "Language",
+        "pick_num_verses": "Study Setup",
+        "num_verses_tested": "Number of verses",
+        "note_num_verses": "If you request more verses than selected, only available verses will appear.",
+        "set_review": "Review Mode",
+        "note_set_review": "Switch between read-only review cards and input mode.",
+        "set_shuffle": "Shuffle Cards",
+        "note_set_shuffle": "Turn on to reshuffle the selected verses.",
+        "hide_reference": "Hide Reference",
+        "note_hide_reference": "Hide the verse location so you can recite both reference and text.",
+        "live_validation": "Live Validation",
+        "note_live_validation": "Show partial and correct feedback while you type.",
+        "pick_pack": "Pick Topics",
+        "tools": "Study Tools",
+        "verses": "Study Cards",
+        "problem_verses_session": "Review Flags",
+        "subtitle": "Navi's calm card layout, refreshed with a Hanyang Blue study theme.",
+        "app_badge": "Hanyang Blue Memory",
+        "today_word": "Today's Word",
+        "today_word_description": "Preview the next verse in your current study flow.",
+        "overview_title": "Study Overview",
+        "overview_description": "A quick snapshot of today's setup.",
+        "selected_packs": "Selected topics",
+        "selected_cards": "Available cards",
+        "study_mode": "Mode",
+        "shuffle_state": "Shuffle",
+        "review_mode_value": "Review",
+        "test_mode_value": "Recite",
+        "on": "On",
+        "off": "Off",
+        "tools_description": "Use quick actions to keep the session moving.",
+        "selection_description": "Choose the packs you want to study.",
+        "study_description": "Recite, reveal, and review in the blue card layout.",
+        "stats_description": "Verses that needed an answer reveal during this session.",
+        "clear_all": "Clear all",
+        "shuffle_now": "Shuffle now",
+        "nav_home": "Home",
+        "nav_settings": "Settings",
+        "nav_cards": "Cards",
+        "nav_stats": "Stats",
+        "no_verse_selected": "Pick a topic to preview and study verses.",
+        "bug_report": "File a bug report",
+        "built_on": "Built on",
+        "lang_english": "English",
+        "lang_korean": "한국어",
+        "answer_revealed_count": "Shown answer {{count}}×",
+        "mobile_focus_note": "A thumb-first study flow rebuilt for phone use.",
+        "study_preferences": "Current preferences",
+        "mobile_preferences_description": "These options shape every recite and review session.",
+        "recite_now": "Recite now",
+        "recite_now_note": "Jump straight into input mode for the selected verses.",
+        "review_now": "Review cards",
+        "review_now_note": "Open read-only cards for calm repetition.",
+        "open_topics": "Pick topics",
+        "no_flags_yet": "No answer reveals yet in this session.",
+        "study_setup_note": "Language and study volume stay close to the thumb zone.",
+        "mobile_toggle_note": "Toggle only the options you need before opening cards.",
+        "nav_topics": "Topics"
     },
     "verse_validator": {
-        "input_reference": "Input Verse Reference:",
-        "input_chapter_title": "Input Chapter Title:",
-        "input_title": "Input Title:",
-        "input_verse": "Input Verse:"
+        "input_reference": "Verse reference",
+        "input_chapter_title": "Chapter title",
+        "input_title": "Topic title",
+        "input_verse": "Verse text",
+        "show_hints": "Show hints",
+        "hide_hints": "Hide hints",
+        "next_word": "Next word",
+        "show_answer": "Show answer",
+        "hide_answer": "Hide answer",
+        "reset": "Reset",
+        "differences": "Answer compare",
+        "pack": "Pack",
+        "reference": "Reference",
+        "chapter_title": "Chapter title",
+        "title": "Title",
+        "verse": "Verse",
+        "verse_number": "Verse {{index}}"
     },
     "nodes": [
         {
@@ -33,11 +88,26 @@
             "value": "tms60",
             "label": "TMS60",
             "children": [
-                { "value": "tms-60-pack-a", "label": "Living the New Life" },
-                { "value": "tms-60-pack-b", "label": "Proclaiming Christ" },
-                { "value": "tms-60-pack-c", "label": "Reliance on God's Resources" },
-                { "value": "tms-60-pack-d", "label": "Being Christ's Disciple" },
-                { "value": "tms-60-pack-e", "label": "Growth in Christlikeness" }
+                {
+                    "value": "tms-60-pack-a",
+                    "label": "Living the New Life"
+                },
+                {
+                    "value": "tms-60-pack-b",
+                    "label": "Proclaiming Christ"
+                },
+                {
+                    "value": "tms-60-pack-c",
+                    "label": "Reliance on God's Resources"
+                },
+                {
+                    "value": "tms-60-pack-d",
+                    "label": "Being Christ's Disciple"
+                },
+                {
+                    "value": "tms-60-pack-e",
+                    "label": "Growth in Christlikeness"
+                }
             ]
         },
         {
@@ -48,66 +118,156 @@
             "value": "dep-2",
             "label": "DEP 2: Quiet Time",
             "children": [
-                { "value": "dep-2-part-a", "label": "Why do we have Quiet Time?" },
-                { "value": "dep-2-part-b", "label": "What is Quiet Time?" },
-                { "value": "dep-2-part-c", "label": "Examples of Quiet Time" }
+                {
+                    "value": "dep-2-part-a",
+                    "label": "Why do we have Quiet Time?"
+                },
+                {
+                    "value": "dep-2-part-b",
+                    "label": "What is Quiet Time?"
+                },
+                {
+                    "value": "dep-2-part-c",
+                    "label": "Examples of Quiet Time"
+                }
             ]
         },
         {
             "value": "dep-3",
             "label": "DEP 3: The Word",
             "children": [
-                { "value": "dep-3-part-a", "label": "Authority of the Word" },
-                { "value": "dep-3-part-b", "label": "value of the Word" },
-                { "value": "dep-3-part-c", "label": "Attitude to the Word" },
-                { "value": "dep-3-part-d", "label": "How to take in the Word (Word Hand Illustration)" }
+                {
+                    "value": "dep-3-part-a",
+                    "label": "Authority of the Word"
+                },
+                {
+                    "value": "dep-3-part-b",
+                    "label": "value of the Word"
+                },
+                {
+                    "value": "dep-3-part-c",
+                    "label": "Attitude to the Word"
+                },
+                {
+                    "value": "dep-3-part-d",
+                    "label": "How to take in the Word (Word Hand Illustration)"
+                }
             ]
         },
         {
             "value": "dep-4",
             "label": "DEP 4: Prayer",
             "children": [
-                { "value": "dep-4-part-a", "label": "Command of Prayer" },
-                { "value": "dep-4-part-b", "label": "Promises and Blessings of Prayer" },
-                { "value": "dep-4-part-c", "label": "Conditions for Answered Prayer" },
-                { "value": "dep-4-part-d", "label": "Examples of Prayer" },
-                { "value": "dep-4-part-e", "label": "Prayer Hand Illustration" }
+                {
+                    "value": "dep-4-part-a",
+                    "label": "Command of Prayer"
+                },
+                {
+                    "value": "dep-4-part-b",
+                    "label": "Promises and Blessings of Prayer"
+                },
+                {
+                    "value": "dep-4-part-c",
+                    "label": "Conditions for Answered Prayer"
+                },
+                {
+                    "value": "dep-4-part-d",
+                    "label": "Examples of Prayer"
+                },
+                {
+                    "value": "dep-4-part-e",
+                    "label": "Prayer Hand Illustration"
+                }
             ]
         },
         {
             "value": "dep-5",
             "label": "DEP 5: Fellowship",
             "children": [
-                { "value": "dep-5-part-a", "label": "Foundation of Christian Fellowship" },
-                { "value": "dep-5-part-b", "label": "Importance of fellowship" },
-                { "value": "dep-5-part-c", "label": "Essentials of fellowship" },
-                { "value": "dep-5-part-d", "label": "Attitude of fellowship" },
-                { "value": "dep-5-part-e", "label": "Problem solving in fellowship" }
+                {
+                    "value": "dep-5-part-a",
+                    "label": "Foundation of Christian Fellowship"
+                },
+                {
+                    "value": "dep-5-part-b",
+                    "label": "Importance of fellowship"
+                },
+                {
+                    "value": "dep-5-part-c",
+                    "label": "Essentials of fellowship"
+                },
+                {
+                    "value": "dep-5-part-d",
+                    "label": "Attitude of fellowship"
+                },
+                {
+                    "value": "dep-5-part-e",
+                    "label": "Problem solving in fellowship"
+                }
             ]
         },
         {
-            "value":"dep-6",
-            "label":"DEP 6: Witnessing",
+            "value": "dep-6",
+            "label": "DEP 6: Witnessing",
             "children": [
-                { "value": "dep-6-part-a", "label": "Who is responsible for witnessing?" },
-                { "value": "dep-6-part-b", "label": "Why should we witness?" },
-                { "value": "dep-6-part-c", "label": "How do we witness?" },
-                { "value": "dep-6-part-d", "label": "Examples of witness" },
-                { "value": "dep-6-part-e", "label": "Bridge Illustration (Creation story)" },
-                { "value": "dep-6-part-f", "label": "Bridge Illustration (Man's condition)" },
-                { "value": "dep-6-part-g", "label": "Bridge Illustration (Salvation not by ourselves)" },
-                { "value": "dep-6-part-h", "label": "Bridge Illustration (God's solution)" },
-                { "value": "dep-6-part-i", "label": "Bridge Illustration (Man must)" }
+                {
+                    "value": "dep-6-part-a",
+                    "label": "Who is responsible for witnessing?"
+                },
+                {
+                    "value": "dep-6-part-b",
+                    "label": "Why should we witness?"
+                },
+                {
+                    "value": "dep-6-part-c",
+                    "label": "How do we witness?"
+                },
+                {
+                    "value": "dep-6-part-d",
+                    "label": "Examples of witness"
+                },
+                {
+                    "value": "dep-6-part-e",
+                    "label": "Bridge Illustration (Creation story)"
+                },
+                {
+                    "value": "dep-6-part-f",
+                    "label": "Bridge Illustration (Man's condition)"
+                },
+                {
+                    "value": "dep-6-part-g",
+                    "label": "Bridge Illustration (Salvation not by ourselves)"
+                },
+                {
+                    "value": "dep-6-part-h",
+                    "label": "Bridge Illustration (God's solution)"
+                },
+                {
+                    "value": "dep-6-part-i",
+                    "label": "Bridge Illustration (Man must)"
+                }
             ]
         },
         {
-            "value":"dep-7",
-            "label":"DEP 7: The Lordship of Christ",
+            "value": "dep-7",
+            "label": "DEP 7: The Lordship of Christ",
             "children": [
-                { "value": "dep-7-part-a", "label": "We must believe in the Lordship of Christ" },
-                { "value": "dep-7-part-b", "label": "Blessings when surrendering to the Lordship" },
-                { "value": "dep-7-part-c", "label": "What to surrender in the Lordship" },
-                { "value": "dep-7-part-d", "label": "Paragons of surrendering to the Lordship" }
+                {
+                    "value": "dep-7-part-a",
+                    "label": "We must believe in the Lordship of Christ"
+                },
+                {
+                    "value": "dep-7-part-b",
+                    "label": "Blessings when surrendering to the Lordship"
+                },
+                {
+                    "value": "dep-7-part-c",
+                    "label": "What to surrender in the Lordship"
+                },
+                {
+                    "value": "dep-7-part-d",
+                    "label": "Paragons of surrendering to the Lordship"
+                }
             ]
         },
         {

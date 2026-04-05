@@ -1,119 +1,166 @@
-.App {
-    max-width: 400px;
-}
-
-
 .VerseValidator {
-  padding-block: 1px 10px;
-  border-top: 1px solid black;
-  max-width: 400px;
+  padding: 18px;
+  background: linear-gradient(180deg, #ffffff 0%, var(--surface-muted) 100%);
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-card);
 }
 
-.reference-box {
-  max-width:400px;
-  height: 5vh;
-  field-sizing: content; /* not yet implemented in firefox and safari */
+.verse-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.verse-number-badge,
+.verse-pack-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-weight: 700;
+  font-size: 0.86rem;
+}
+
+.verse-number-badge {
+  background: var(--hy-blue-soft);
+  color: var(--hy-blue);
+}
+
+.verse-pack-badge {
+  background: white;
+  border: 1px solid var(--hy-blue-border);
+  color: var(--text-primary);
+}
+
+.reference-display-card {
+  margin-bottom: 14px;
+  padding: 18px;
+  border-radius: 22px;
+  color: white;
+  background: linear-gradient(160deg, #0b5d9f 0%, var(--hy-blue) 100%);
+}
+
+.reference-display-card h3 {
+  margin: 8px 0 6px;
+  font-size: 1.15rem;
+}
+
+.reference-display-card p {
+  margin: 0;
+  opacity: 0.84;
+}
+
+.preview-label,
+.field-label {
   display: block;
-  width: 99%;
-  border: 1px solid grey;
-  border-radius: 5px;
-  font-size: 15px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
 }
 
-.chapter-title-box {
-  max-width:400px;
-  height: 5vh;
-  field-sizing: content; /* not yet implemented in firefox and safari */
+.field-group + .field-group {
+  margin-top: 14px;
+}
+
+.field-label {
+  margin-bottom: 8px;
+  color: var(--text-secondary);
+}
+
+.reference-box,
+.chapter-title-box,
+.title-box,
+.verse-box {
   display: block;
-  width: 99%;
-  border: 1px solid grey;
-  border-radius: 5px;
-  font-size: 15px;
+  width: 100%;
+  border: 1px solid var(--hy-blue-border);
+  border-radius: 18px;
+  background: white;
+  color: var(--text-primary);
+  padding: 14px 16px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
+.reference-box:focus,
+.chapter-title-box:focus,
+.title-box:focus,
+.verse-box:focus {
+  outline: none;
+  border-color: var(--hy-blue);
+  box-shadow: 0 0 0 4px var(--hy-blue-glow);
+}
+
+.reference-box,
+.chapter-title-box,
 .title-box {
-  max-width: 400px;
-  height: 5vh;
-  field-sizing: content; /* not yet implemented in firefox and safari */
-  display: block;
-  width: 99%;
-  border: 1px solid grey;
-  border-radius: 5px;
-  font-size: 15px;
+  min-height: 54px;
 }
-
-.reference-label .main-title-box-label .title-box-label .verse-box-label {
-  pointer-events: none;
-}
-
 
 .verse-box {
-  max-width:400px;
-  min-height: 12vh;
-  field-sizing: content; /* not yet implemented in firefox and safari */
-  display: block;
-  width: 99%;
-  border: 1px solid grey;
-  border-radius: 5px;
-  font-size: 15px;
+  min-height: 150px;
+}
+
+.correct {
+  background: #eef8f3;
+  border-color: #a6d8bf;
+}
+
+.partial {
+  background: #eef5fb;
+  border-color: #9ec0e0;
+}
+
+.incorrect {
+  background: white;
+}
+
+.hint-area {
+  margin-top: 10px;
+  padding: 14px;
+  border-radius: 18px;
+  background: var(--hy-blue-soft);
+}
+
+.hint-text {
+  margin: 0 0 10px;
+  color: var(--text-primary);
 }
 
 .verse-validator-button-box {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
-  padding-top: 10px;
-}
-
-.answer-box {
-  width: 80%;
+  margin-top: 16px;
 }
 
 .diff-box {
-  width: 80%;
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 22px;
+  background: white;
+  border: 1px solid var(--border);
 }
 
-
-
-@media (prefers-color-scheme: light) {
-  .correct {
-    background-color: #e6ffe6; /* Change the background color as needed */
-  } 
-
-  .partial {
-    background-color: #dafcff; /* Change the background color as needed */
-  }
-
-  .incorrect {
-    background-color: transparent; /* Change the background color as needed */
-  }
-
-  :root {
-    --background-color-removed: #f1ebb3;
-    --background-color-added: #ffd7b6;
-  }
+.diff-box h3 {
+  margin: 0 0 14px;
 }
 
-
-@media (prefers-color-scheme: dark) {
-  .correct {
-    background-color: #2e5e2e; /* Change the background color as needed */
-  }
-
-  .partial {
-    background-color: #004d5c; /* Change the background color as needed */
-  }
-
-  .incorrect {
-    background-color: transparent; /* Change the background color as needed */
-  }
-
-  :root {
-    --background-color-removed: #877e2a;
-    --background-color-added: #7b4418;
-  }
-
-  .VerseValidator {
-    border-top: 1px solid white; /* override for dark mode */
-  }
+.diff-line + .diff-line {
+  margin-top: 12px;
 }
 
+.diff-line span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.diff-line-verse {
+  line-height: 1.7;
+}

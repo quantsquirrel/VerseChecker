@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from "react";
-import "./VerseValidator.css";
+/* eslint-disable react/prop-types */
+import { useCallback, useEffect, useRef, useState } from "react";
 import { StringDiff } from "react-string-diff";
-import { containsKorean, jamoSubstringMatch } from './utils';
+import { containsKorean, jamoSubstringMatch } from "./utils";
+import "./VerseValidator.css";
 
 const STATE = {
   INCORRECT: 0,
@@ -9,260 +10,221 @@ const STATE = {
   CORRECT: 2,
 };
 
+const DiffViewerStrict = ({ oldValue, newValue }) => {
+  const string1 = String(oldValue).toLowerCase().normalize("NFC");
+  const string2 = String(newValue).toLowerCase().normalize("NFC");
 
-// function to render and handle logic of each of the cells
-const VerseValidator = (
-  { element: 
-    { pack, title, chapterTitle, reference, verse },
-    toHideReference,
-    liveValidation,
-    clearKey,
-    t,
-    index,
-    onShowAnswer
-  }) => {  // useful use of destructuring here
-  const [inputReference, setReference] = useState('')
-  const [referenceBool, setReferenceBool] = useState(STATE.INCORRECT)
-  const [inputChapterTitle, setChapterTitle] = useState('')
-  const [chapterTitleBool, setChapterTitleBool] = useState(STATE.INCORRECT)
-  const [inputTitle, setTitle] = useState('')
-  const [titleBool, setTitleBool] = useState(STATE.INCORRECT)
-  const [inputVerse, setVerse] = useState('')
-  const [verseBool, setVerseBool] = useState(STATE.INCORRECT)
-  const [hintBool, setHintBool] = useState(false)
-  const [diffBool, setDiffBool] = useState(false)
+  return (
+    <StringDiff
+      oldValue={string1}
+      newValue={string2}
+      diffMethod="diffWords"
+      styles={{
+        added: {
+          backgroundColor: "var(--background-color-added)",
+        },
+        removed: {
+          backgroundColor: "var(--background-color-removed)",
+        },
+        default: {},
+      }}
+    />
+  );
+};
+
+const getHintText = (text, count) => text.split(" ").slice(0, count).join(" ");
+
+const VerseValidator = ({
+  element: { pack, title, chapterTitle, reference, verse },
+  toHideReference,
+  liveValidation,
+  clearKey,
+  t,
+  index,
+  onShowAnswer,
+}) => {
+  const [inputReference, setReference] = useState("");
+  const [referenceBool, setReferenceBool] = useState(STATE.INCORRECT);
+  const [inputChapterTitle, setChapterTitle] = useState("");
+  const [chapterTitleBool, setChapterTitleBool] = useState(STATE.INCORRECT);
+  const [inputTitle, setTitle] = useState("");
+  const [titleBool, setTitleBool] = useState(STATE.INCORRECT);
+  const [inputVerse, setVerse] = useState("");
+  const [verseBool, setVerseBool] = useState(STATE.INCORRECT);
+  const [hintBool, setHintBool] = useState(false);
+  const [diffBool, setDiffBool] = useState(false);
   const [isComposing, setIsComposing] = useState(false);
   const isInitialMount = useRef(true);
 
-  // State for hint word counts
   const [referenceHintCount, setReferenceHintCount] = useState(0);
   const [titleHintCount, setTitleHintCount] = useState(0);
   const [chapterTitleHintCount, setChapterTitleHintCount] = useState(0);
   const [verseHintCount, setVerseHintCount] = useState(0);
 
-  useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-    } else {
-      handleReset();
-    }
-  }, [clearKey]);
-
-  useEffect(() => {
-    // Re-run validation for all fields when liveValidation changes
-    // Using current input values to re-evaluate their state
-    validateReference(inputReference);
-    validateChapterTitle(inputChapterTitle);
-    validateTitle(inputTitle);
-    validateVerse(inputVerse);
-  }, [liveValidation]); // Dependency array: re-run effect when liveValidation changes
-
-  // handle reset
-  const handleReset = () => {
-    setReference('');
+  const handleReset = useCallback(() => {
+    setReference("");
     setReferenceBool(STATE.INCORRECT);
-    setChapterTitle('');
+    setChapterTitle("");
     setChapterTitleBool(STATE.INCORRECT);
-    setTitle('');
+    setTitle("");
     setTitleBool(STATE.INCORRECT);
-    setVerse('');
+    setVerse("");
     setVerseBool(STATE.INCORRECT);
-    setDiffBool(false); // optionally hide answer again
+    setDiffBool(false);
     setHintBool(false);
-    // Reset hint counts
     setReferenceHintCount(0);
     setTitleHintCount(0);
     setChapterTitleHintCount(0);
     setVerseHintCount(0);
-  };
+  }, []);
 
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
 
+    handleReset();
+  }, [clearKey, handleReset]);
 
-  // Handle the start of composition
+  const resultChecker = useCallback((string1, string2, isLiveValidation) => {
+    if (containsKorean(string1)) {
+      if (string1 === string2) {
+        return STATE.CORRECT;
+      }
+      if (isLiveValidation && jamoSubstringMatch(string2, string1) && string1 !== "") {
+        return STATE.PARTIAL;
+      }
+      return STATE.INCORRECT;
+    }
+
+    if (string1 === string2) {
+      return STATE.CORRECT;
+    }
+    if (isLiveValidation && string2.startsWith(string1) && string1 !== "") {
+      return STATE.PARTIAL;
+    }
+    return STATE.INCORRECT;
+  }, []);
+
+  const validateReference = useCallback((value) => {
+    const string1 = String(value).replace(/\s+/g, "").toLowerCase().normalize("NFC");
+    const string2 = String(reference).replace(/\s+/g, "").toLowerCase().normalize("NFC");
+    setReferenceBool(resultChecker(string1, string2, liveValidation));
+  }, [liveValidation, reference, resultChecker]);
+
+  const validateTitle = useCallback((value) => {
+    const string1 = String(value)
+      .replace(/[\p{P}\p{S}]/gu, "")
+      .replace(/\s+/g, "")
+      .toLowerCase()
+      .normalize("NFC");
+
+    const string2 = String(title)
+      .replace(/[\p{P}\p{S}]/gu, "")
+      .replace(/\s+/g, "")
+      .toLowerCase()
+      .normalize("NFC");
+
+    setTitleBool(resultChecker(string1, string2, liveValidation));
+  }, [liveValidation, resultChecker, title]);
+
+  const validateChapterTitle = useCallback((value) => {
+    const string1 = String(value)
+      .replace(/[\p{P}\p{S}]/gu, "")
+      .replace(/\s+/g, "")
+      .toLowerCase()
+      .normalize("NFC");
+
+    const string2 = String(chapterTitle)
+      .replace(/[\p{P}\p{S}]/gu, "")
+      .replace(/\s+/g, "")
+      .toLowerCase()
+      .normalize("NFC");
+
+    setChapterTitleBool(resultChecker(string1, string2, liveValidation));
+  }, [chapterTitle, liveValidation, resultChecker]);
+
+  const validateVerse = useCallback((value) => {
+    const string1 = String(value)
+      .replace(/[\p{P}\p{S}]/gu, "")
+      .replace(/\s+/g, "")
+      .toLowerCase()
+      .normalize("NFC");
+
+    const string2 = String(verse)
+      .replace(/[\p{P}\p{S}]/gu, "")
+      .replace(/\s+/g, "")
+      .toLowerCase()
+      .normalize("NFC");
+
+    setVerseBool(resultChecker(string1, string2, liveValidation));
+  }, [liveValidation, resultChecker, verse]);
+
+  useEffect(() => {
+    validateReference(inputReference);
+    validateChapterTitle(inputChapterTitle);
+    validateTitle(inputTitle);
+    validateVerse(inputVerse);
+  }, [
+    inputChapterTitle,
+    inputReference,
+    inputTitle,
+    inputVerse,
+    liveValidation,
+    validateChapterTitle,
+    validateReference,
+    validateTitle,
+    validateVerse,
+  ]);
+
+  const referenceClassName = `reference-box ${
+    referenceBool === STATE.CORRECT ? "correct" : referenceBool === STATE.PARTIAL ? "partial" : "incorrect"
+  }`;
+  const titleClassName = `chapter-title-box ${
+    titleBool === STATE.CORRECT ? "correct" : titleBool === STATE.PARTIAL ? "partial" : "incorrect"
+  }`;
+  const chapterTitleClassName = `title-box ${
+    chapterTitleBool === STATE.CORRECT ? "correct" : chapterTitleBool === STATE.PARTIAL ? "partial" : "incorrect"
+  }`;
+  const verseClassName = `verse-box ${
+    verseBool === STATE.CORRECT ? "correct" : verseBool === STATE.PARTIAL ? "partial" : "incorrect"
+  }`;
+
   const handleCompositionStart = () => {
     setIsComposing(true);
   };
 
-  function resultChecker(string1, string2, liveValidation) {
-    var result = STATE.INCORRECT; // init
-    // contains korean
-    if (containsKorean(string1)) {
-      if (string1 === string2) {
-        result = STATE.CORRECT;
-      } else if (liveValidation && jamoSubstringMatch(string2, string1) & string1 !== "") {
-        result = STATE.PARTIAL;
-      } else {
-        result = STATE.INCORRECT;
-      }
-    } else { // does not contain korean
-      if (string1 === string2) {
-        result = STATE.CORRECT;
-      } else if (liveValidation && string2.startsWith(string1) & string1 !== "") {
-        result = STATE.PARTIAL;
-      } else {
-        result = STATE.INCORRECT;
-      }
-    }
-    return result;
-
-  }
-
-  // function to check correctness of reference input
-  const validateReference = (value) => {
-    const string1 = String(value)
-      .replace(/\s+/g, "")
-      .toLowerCase()
-      .normalize("NFC");
-    const string2 = String(reference)
-      .replace(/\s+/g, "")
-      .toLowerCase()
-      .normalize("NFC");
-    
-    const result = resultChecker(string1, string2, liveValidation);
-
-    setReferenceBool(result);
+  const handleCompositionEnd = (setter, validator) => (event) => {
+    const value = event.target.value;
+    setIsComposing(false);
+    setter(value);
+    validator(value);
   };
-
-  const referenceClassName = `reference-box${
-    referenceBool === STATE.CORRECT ? " correct" : 
-    referenceBool === STATE.PARTIAL ? " partial" : 
-    " incorrect"
-  }`;
-
-
-  {/* function to check correctness of title input */}
-  const validateTitle = (value) => {
-    let string1 = value;
-    let string2 = title;
-    string1 = String(string1)
-      .replace(/[\p{P}\p{S}]/gu, "") // Removes punctuation and symbols
-      .replace(/\s+/g, "")            // Removes all whitespace
-      .toLowerCase()
-      .normalize("NFC");              // Normalizes to NFC form
-
-    string2 = String(string2)
-      .replace(/[\p{P}\p{S}]/gu, "")
-      .replace(/\s+/g, "")
-      .toLowerCase()
-      .normalize("NFC");
-
-    const result = resultChecker(string1, string2, liveValidation);
-    setTitleBool(result);
-  };
-
-
-
-  const titleClassName = `chapter-title-box${
-    titleBool=== STATE.CORRECT ? " correct" : 
-    titleBool === STATE.PARTIAL ? " partial" : 
-    " incorrect"
-  }`;
-
-
-
-  {/* function to check correctness of chapter title input */}
-  const validateChapterTitle = (value) => {
-
-    let string1 = value;
-    let string2 = chapterTitle;
-    string1 = String(string1)
-      .replace(/[\p{P}\p{S}]/gu, "")
-      .replace(/\s+/g, "")
-      .toLowerCase()
-      .normalize("NFC");
-
-    string2 = String(string2)
-      .replace(/[\p{P}\p{S}]/gu, "")
-      .replace(/\s+/g, "")
-      .toLowerCase()
-      .normalize("NFC");
-
-    const result = resultChecker(string1, string2, liveValidation);
-
-    setChapterTitleBool(result);
-  };
-
-  const chapterTitleClassName = `title-box${
-    chapterTitleBool=== STATE.CORRECT ? " correct" : 
-    chapterTitleBool === STATE.PARTIAL ? " partial" : 
-    " incorrect"
-  }`;
-
-
-  // check verse input
-  const validateVerse = (value) => {
-    let string1 = value;
-    let string2 = verse;
-    string1 = String(string1)
-      .replace(/[\p{P}\p{S}]/gu, "")
-      .replace(/\s+/g, "")
-      .toLowerCase()
-      .normalize("NFC");
-    string2 = String(string2)
-      .replace(/[\p{P}\p{S}]/gu, "")
-      .replace(/\s+/g, "")
-      .toLowerCase()
-      .normalize("NFC");
-
-    const result = resultChecker(string1, string2, liveValidation);
-
-    setVerseBool(result);
-  };
-
-  const verseClassName = `verse-box${
-    verseBool === STATE.CORRECT ? " correct" : 
-    verseBool === STATE.PARTIAL ? " partial" : 
-    " incorrect"
-  }`;
-
-
-  const DiffViewerStrict = ({oldValue, newValue}) => {
-    const string1 = String(oldValue)
-      .toLowerCase()
-      .normalize("NFC");
-
-    const string2 = String(newValue)
-      .toLowerCase()
-      .normalize("NFC");
-
-
-    let diffStyle = {
-      added: {
-        backgroundColor: 'var(--background-color-added)'
-      },
-      removed: {
-        backgroundColor: 'var(--background-color-removed)'
-      },
-      default: {}
-    };
-
-
-    return (<StringDiff 
-      oldValue={string1} 
-      newValue={string2} 
-      diffMethod="diffWords" 
-      styles={diffStyle}
-      />)
-  }
-
 
   return (
     <div className="VerseValidator">
-      <div className="verse-number">
-        <h3>Verse {index}</h3>
+      <div className="verse-card-header">
+        <span className="verse-number-badge">{t("verse_validator.verse_number", { index })}</span>
+        <span className="verse-pack-badge">{pack}</span>
       </div>
 
-      {/* toggle hiding reference */}
-      {toHideReference ? (
-        <div>
-          <label className="reference-label">
-            {t('verse_validator.input_reference')} 
+      {!toHideReference ? (
+        <div className="reference-display-card">
+          <span className="preview-label">{t("verse_validator.reference")}</span>
+          <h3>{reference}</h3>
+          <p>{chapterTitle || title}</p>
+        </div>
+      ) : (
+        <div className="field-group">
+          <label className="field-label" htmlFor={`referenceBox-${index}`}>
+            {t("verse_validator.input_reference")}
           </label>
           <textarea
             className={referenceClassName}
-            type="text"
-            id="referenceBox"
+            id={`referenceBox-${index}`}
             name="referenceBox"
+            rows="1"
             value={inputReference}
             onInput={(event) => {
               const value = event.target.value;
@@ -272,44 +234,34 @@ const VerseValidator = (
               }
             }}
             onCompositionStart={handleCompositionStart}
-            onCompositionEnd={(event) => {
-              const value = event.target.value;
-              setIsComposing(false);
-              setReference(value);
-              validateReference(value);
-            }}
+            onCompositionEnd={handleCompositionEnd(setReference, validateReference)}
           />
-          {hintBool && (
+          {hintBool ? (
             <div className="hint-area">
-              <p className="hint-text">
-                Hint: {reference.split(' ').slice(0, referenceHintCount).join(' ')}
-              </p>
+              <p className="hint-text">{getHintText(reference, referenceHintCount)}</p>
               <button
-                onClick={() => setReferenceHintCount(prev => prev + 1)}
-                disabled={referenceHintCount >= reference.split(' ').length}
+                type="button"
+                className="secondary-button small-button"
+                onClick={() => setReferenceHintCount((current) => current + 1)}
+                disabled={referenceHintCount >= reference.split(" ").length}
               >
-                Next Word
+                {t("verse_validator.next_word")}
               </button>
             </div>
-          )}
+          ) : null}
         </div>
-      ) : (
-        <h2>
-          {reference}
-        </h2>
       )}
 
-      {/* toggle chapterTitle */}
-      {chapterTitle && (
-        <div>
-          <label className="main-title-box-label">
-            {t('verse_validator.input_chapter_title')} 
+      {chapterTitle ? (
+        <div className="field-group">
+          <label className="field-label" htmlFor={`chapterTitleBox-${index}`}>
+            {t("verse_validator.input_chapter_title")}
           </label>
           <textarea
             className={chapterTitleClassName}
-            type="text"
-            id="chapterTitleBox"
+            id={`chapterTitleBox-${index}`}
             name="chapterTitleBox"
+            rows="1"
             value={inputChapterTitle}
             onInput={(event) => {
               const value = event.target.value;
@@ -319,39 +271,33 @@ const VerseValidator = (
               }
             }}
             onCompositionStart={handleCompositionStart}
-            onCompositionEnd={(event) => {
-              const value = event.target.value;
-              setIsComposing(false);
-              setChapterTitle(value);
-              validateChapterTitle(value);
-            }}
+            onCompositionEnd={handleCompositionEnd(setChapterTitle, validateChapterTitle)}
           />
-          {hintBool && (
+          {hintBool ? (
             <div className="hint-area">
-              <p className="hint-text">
-                Hint: {chapterTitle.split(' ').slice(0, chapterTitleHintCount).join(' ')}
-              </p>
+              <p className="hint-text">{getHintText(chapterTitle, chapterTitleHintCount)}</p>
               <button
-                onClick={() => setChapterTitleHintCount(prev => prev + 1)}
-                disabled={chapterTitleHintCount >= chapterTitle.split(' ').length}
+                type="button"
+                className="secondary-button small-button"
+                onClick={() => setChapterTitleHintCount((current) => current + 1)}
+                disabled={chapterTitleHintCount >= chapterTitle.split(" ").length}
               >
-                Next Word
+                {t("verse_validator.next_word")}
               </button>
             </div>
-          )}
+          ) : null}
         </div>
-      )}
+      ) : null}
 
-      {/* input box for title */}
-      <div>
-        <label className="title-box-label">
-          {t('verse_validator.input_title')} 
+      <div className="field-group">
+        <label className="field-label" htmlFor={`titleBox-${index}`}>
+          {t("verse_validator.input_title")}
         </label>
         <textarea
           className={titleClassName}
-          type="text"
-          id="titleBox"
+          id={`titleBox-${index}`}
           name="titleBox"
+          rows="1"
           value={inputTitle}
           onInput={(event) => {
             const value = event.target.value;
@@ -361,38 +307,32 @@ const VerseValidator = (
             }
           }}
           onCompositionStart={handleCompositionStart}
-          onCompositionEnd={(event) => {
-            const value = event.target.value;
-            setIsComposing(false);
-            setTitle(value);
-            validateTitle(value);
-          }}
+          onCompositionEnd={handleCompositionEnd(setTitle, validateTitle)}
         />
-        {hintBool && (
+        {hintBool ? (
           <div className="hint-area">
-            <p className="hint-text">
-              Hint: {title.split(' ').slice(0, titleHintCount).join(' ')}
-            </p>
+            <p className="hint-text">{getHintText(title, titleHintCount)}</p>
             <button
-              onClick={() => setTitleHintCount(prev => prev + 1)}
-              disabled={titleHintCount >= title.split(' ').length}
+              type="button"
+              className="secondary-button small-button"
+              onClick={() => setTitleHintCount((current) => current + 1)}
+              disabled={titleHintCount >= title.split(" ").length}
             >
-              Next Word
+              {t("verse_validator.next_word")}
             </button>
           </div>
-        )}
+        ) : null}
       </div>
 
-      {/* input box for verse */}
-      <div>
-        <label className="verse-box-label">
-          {t('verse_validator.input_verse')} 
+      <div className="field-group">
+        <label className="field-label" htmlFor={`verseBox-${index}`}>
+          {t("verse_validator.input_verse")}
         </label>
         <textarea
           className={verseClassName}
-          type="text"
-          id="verseBox"
+          id={`verseBox-${index}`}
           name="verseBox"
+          rows="5"
           value={inputVerse}
           onInput={(event) => {
             const value = event.target.value;
@@ -402,102 +342,74 @@ const VerseValidator = (
             }
           }}
           onCompositionStart={handleCompositionStart}
-          onCompositionEnd={(event) => {
-            const value = event.target.value;
-            setIsComposing(false);
-            setVerse(value);
-            validateVerse(value);
-          }}
+          onCompositionEnd={handleCompositionEnd(setVerse, validateVerse)}
         />
-        {hintBool && (
+        {hintBool ? (
           <div className="hint-area">
-            <p className="hint-text">
-              Hint: {verse.split(' ').slice(0, verseHintCount).join(' ')}
-            </p>
+            <p className="hint-text">{getHintText(verse, verseHintCount)}</p>
             <button
-              onClick={() => setVerseHintCount(prev => prev + 1)}
-              disabled={verseHintCount >= verse.split(' ').length}
+              type="button"
+              className="secondary-button small-button"
+              onClick={() => setVerseHintCount((current) => current + 1)}
+              disabled={verseHintCount >= verse.split(" ").length}
             >
-              Next Word
+              {t("verse_validator.next_word")}
             </button>
           </div>
-        )}
+        ) : null}
       </div>
 
-      {/* buttons to toggle per-block functionality*/}
       <div className="verse-validator-button-box">
-        {/* hint button*/}
-        <button onClick={() => setHintBool(!hintBool)}>
-            {hintBool ? 'Hide Hints' : 'Show Hints'}
+        <button type="button" className="secondary-button" onClick={() => setHintBool((current) => !current)}>
+          {hintBool ? t("verse_validator.hide_hints") : t("verse_validator.show_hints")}
         </button>
-        {/* show answer button*/}
-        <button onClick={() => {
-            // Toggle the diff display
-            setDiffBool(prev => !prev);
-            // If it's being turned ON, and onShowAnswer is provided, call it.
-            // We only want to count when the user explicitly reveals the answer.
+        <button
+          type="button"
+          className="primary-button"
+          onClick={() => {
+            setDiffBool((current) => !current);
             if (!diffBool && onShowAnswer) {
-                onShowAnswer({ pack, title, reference });
+              onShowAnswer({ pack, title, reference });
             }
-        }}>Show Answer</button>
-        {/* reset button*/}
-        <button onClick={handleReset}>Reset</button>
+          }}
+        >
+          {diffBool ? t("verse_validator.hide_answer") : t("verse_validator.show_answer")}
+        </button>
+        <button type="button" className="ghost-button" onClick={handleReset}>
+          {t("verse_validator.reset")}
+        </button>
       </div>
 
-      {/* This shows the difference between given and input answers*/}
-      {diffBool && (
+      {diffBool ? (
         <div className="diff-box">
-          <h3>Differences</h3>
+          <h3>{t("verse_validator.differences")}</h3>
 
-
-          <p></p>
-          <div>
-            Pack: <br></br>{pack}
+          <div className="diff-line">
+            <span>{t("verse_validator.pack")}</span>
+            <strong>{pack}</strong>
           </div>
-
-          <p></p>
-          <div>
-            Reference: 
-            <DiffViewerStrict 
-              oldValue={reference} 
-              newValue={inputReference} 
-            />
+          <div className="diff-line">
+            <span>{t("verse_validator.reference")}</span>
+            <DiffViewerStrict oldValue={reference} newValue={inputReference} />
           </div>
-
-
-          <p></p>
-          {chapterTitle && (
-            <div>
-              Chapter title:
-              <DiffViewerStrict
-                oldValue={chapterTitle}
-                newValue={inputChapterTitle}
-              />
+          {chapterTitle ? (
+            <div className="diff-line">
+              <span>{t("verse_validator.chapter_title")}</span>
+              <DiffViewerStrict oldValue={chapterTitle} newValue={inputChapterTitle} />
             </div>
-          )}
-
-          <p></p>
-          <div>
-            Title: 
-            <DiffViewerStrict 
-              oldValue={title} 
-              newValue={inputTitle} 
-            />
+          ) : null}
+          <div className="diff-line">
+            <span>{t("verse_validator.title")}</span>
+            <DiffViewerStrict oldValue={title} newValue={inputTitle} />
           </div>
-
-          <p></p>
-          <div>
-            Verse: 
-            <DiffViewerStrict 
-              oldValue={verse} 
-              newValue={inputVerse} 
-            />
-            </div>
+          <div className="diff-line diff-line-verse">
+            <span>{t("verse_validator.verse")}</span>
+            <DiffViewerStrict oldValue={verse} newValue={inputVerse} />
           </div>
-      )}
+        </div>
+      ) : null}
     </div>
   );
+};
 
-}
-
-export default VerseValidator
+export default VerseValidator;

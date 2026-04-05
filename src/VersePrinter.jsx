@@ -1,64 +1,37 @@
-import { useState } from "react";
+/* eslint-disable react/prop-types */
 import "./VersePrinter.css";
-import { StringDiff } from "react-string-diff";
-import { containsKorean, jamoSubstringMatch } from './utils';
 
-const STATE = {
-  INCORRECT: 0,
-  PARTIAL: 1,
-  CORRECT: 2,
-};
+const VersePrinter = ({ element: { pack, title, chapterTitle, reference, verse }, t, index }) => (
+  <div className="VersePrinter">
+    <div className="verse-card-header">
+      <span className="verse-number-badge">{t("verse_validator.verse_number", { index })}</span>
+      <span className="verse-pack-badge">{pack}</span>
+    </div>
 
- 
-
-// function to render and handle logic of each of the cells
-const VersePrinter = ({ element: { pack, title, chapterTitle, reference, verse } , t, index}) => {  // useful use of destructuring here
-
-
-  return (
-    <div className="VersePrinter">
-      <div className="verse-number">
-        <h3>Verse {index}</h3>
+    <div className="review-block">
+      <div className="review-row">
+        <span className="review-label">{t("verse_validator.reference")}</span>
+        <strong>{reference}</strong>
       </div>
 
-      {/* This shows the difference between given and input answers*/}
-      <div className="diff-box">
-
-        <p></p>
-        <div>
-          <h3>Pack:</h3>
-          <p>{pack}</p>
+      {chapterTitle ? (
+        <div className="review-row">
+          <span className="review-label">{t("verse_validator.chapter_title")}</span>
+          <p>{chapterTitle}</p>
         </div>
+      ) : null}
 
-        <p></p>
-        <div>
-          <h3>Reference:</h3>
-          <p>{reference}</p>
-        </div>
+      <div className="review-row">
+        <span className="review-label">{t("verse_validator.title")}</span>
+        <p>{title}</p>
+      </div>
 
-        <p></p>
-        {chapterTitle && (
-          <div>
-            <h3>Chapter Title:</h3>
-            <p>{chapterTitle}</p>
-          </div>
-        )}
-
-        <p></p>
-        <div>
-          <h3>Title:</h3>
-          <p>{title}</p>
-        </div>
-
-        <p></p>
-        <div>
-          <h3>Verse: </h3>
-          <p>{verse}</p>
-          </div>
-        </div>
+      <div className="review-row review-verse-row">
+        <span className="review-label">{t("verse_validator.verse")}</span>
+        <p>{verse}</p>
+      </div>
     </div>
-  );
+  </div>
+);
 
-}
-
-export default VersePrinter
+export default VersePrinter;
